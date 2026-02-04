@@ -1,28 +1,20 @@
-"""
-Agent Runner for executing the TodoAssistant agent.
-Provides the execution layer for processing chat messages.
-"""
+import os
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Optional, List
 from uuid import UUID
 
 from agents import Runner, ToolCallItem, ToolCallOutputItem
+from agents.models.multi_provider import MultiProvider
+from agents.run import RunConfig
 from sqlmodel import Session
 
 from .todo_agent import AgentContext, create_todo_agent, TodoAgent
-from .config import AgentConfig, get_agent_config
+from .config import AgentConfig, get_agent_config, LLMProvider, AgentConfigError
 
 
 @dataclass
 class ToolCallInfo:
-    """
-    Information about a tool call made by the agent.
-
-    Attributes:
-        tool: Name of the tool called
-        input: Input parameters passed to the tool
-        output: Output returned by the tool
-    """
+    """Information about a tool call made by the agent."""
     tool: str
     input: dict[str, Any]
     output: Any
@@ -30,103 +22,46 @@ class ToolCallInfo:
 
 @dataclass
 class AgentResponse:
-    """
-    Response from the agent runner.
-
-    Attributes:
-        response: The agent's text response to the user
-        tool_calls: List of tool calls made during processing
-    """
+    """Response from the agent runner."""
     response: str
     tool_calls: list[ToolCallInfo]
 
 
 class AgentRunner:
     """
-    Runner for executing the TodoAssistant agent.
-
-    This class provides a stateless execution model - each run is independent
-    and all context (history, user_id) must be provided per request.
+    Runner for executing the TodoAssistant agent with multi-provider fallback.
     """
 
     def __init__(self, config: Optional[AgentConfig] = None):
-        """
-        Initialize the AgentRunner.
-
-        Args:
-            config: Optional AgentConfig for customization.
-        """
         self.config = config or get_agent_config()
-        self._agent: Optional[TodoAgent] = None
 
-    def get_agent(self, user_name: Optional[str] = None) -> TodoAgent:
-        """Get or create the agent instance.
-
-        Note: Agent is created fresh each time to ensure current date/time
-        in the system prompt is accurate.
-
-        Args:
-            user_name: Optional user name for personalized responses.
-        """
-        # Always create fresh agent to get current date/time in prompt
-        return create_todo_agent(self.config, user_name=user_name)
+    def get_agent(self, model: str, user_name: Optional[str] = None) -> TodoAgent:
+        """Create a fresh agent instance for a specific model."""
+        return create_todo_agent(model, self.config, user_name=user_name)
 
     def _build_input(
         self,
         message: str,
         history: Optional[list[dict[str, str]]] = None,
     ) -> list[dict[str, Any]]:
-        """
-        Build the input list for the agent from message and history.
-
-        Args:
-            message: The current user message
-            history: Optional list of previous messages
-                    [{"role": "user"|"assistant", "content": "..."}]
-
-        Returns:
-            List of input items for the agent
-        """
-        input_items: list[dict[str, Any]] = []
-
-        # Add history if provided
+        input_items = []
         if history:
             for msg in history:
-                input_items.append({
-                    "role": msg["role"],
-                    "content": msg["content"],
-                })
-
-        # Add current message
-        input_items.append({
-            "role": "user",
-            "content": message,
-        })
-
+                input_items.append({"role": msg["role"], "content": msg["content"]})
+        input_items.append({"role": "user", "content": message})
         return input_items
 
     def _extract_tool_calls(self, new_items: list) -> list[ToolCallInfo]:
-        """
-        Extract tool call information from agent run items.
-
-        Args:
-            new_items: List of items from the agent run
-
-        Returns:
-            List of ToolCallInfo objects
-        """
-        tool_calls: list[ToolCallInfo] = []
-        tool_inputs: dict[str, dict[str, Any]] = {}
+        tool_calls = []
+        tool_inputs = {}
 
         def get_attr(obj: Any, key: str, default: Any = None) -> Any:
-            """Get attribute from object or dict."""
             if isinstance(obj, dict):
                 return obj.get(key, default)
             return getattr(obj, key, default)
 
         for item in new_items:
             if isinstance(item, ToolCallItem):
-                # Store the tool call input by ID for later matching
                 raw = item.raw_item
                 item_id = get_attr(raw, 'id') or get_attr(raw, 'call_id')
                 item_name = get_attr(raw, 'name') or get_attr(raw, 'function', {})
@@ -137,15 +72,11 @@ class AgentRunner:
                     try:
                         import json
                         item_args = json.loads(item_args)
-                    except (json.JSONDecodeError, TypeError):
+                    except:
                         item_args = {}
                 if item_id:
-                    tool_inputs[item_id] = {
-                        "tool": item_name,
-                        "input": item_args,
-                    }
+                    tool_inputs[item_id] = {"tool": item_name, "input": item_args}
             elif isinstance(item, ToolCallOutputItem):
-                # Match with the tool call input
                 raw = item.raw_item
                 call_id = get_attr(raw, 'call_id') or get_attr(raw, 'tool_call_id')
                 if call_id and call_id in tool_inputs:
@@ -155,7 +86,6 @@ class AgentRunner:
                         input=info["input"],
                         output=item.output,
                     ))
-
         return tool_calls
 
     async def run(
@@ -166,57 +96,68 @@ class AgentRunner:
         history: Optional[list[dict[str, str]]] = None,
         user_name: Optional[str] = None,
     ) -> AgentResponse:
-        """
-        Run the agent with a user message.
+        """Run the agent with fallback logic across multiple providers."""
+        if not self.config.providers:
+            raise AgentConfigError("No valid AI keys found. Please check your .env file.")
 
-        Args:
-            session: Database session for task operations
-            user_id: UUID of the authenticated user
-            message: The user's natural language message
-            history: Optional conversation history
-            user_name: Optional user name for personalized responses
-
-        Returns:
-            AgentResponse with the agent's response and tool calls
-        """
-        # Create context for tools
+        input_items = self._build_input(message, history)
         context = AgentContext(session=session, user_id=user_id)
 
-        # Build input from message and history
-        input_items = self._build_input(message, history)
+        last_error = None
+        
+        for provider in self.config.providers:
+            # FIX: Shield model names with '/' by prepending 'openai/'
+            # This prevents MultiProvider from crashing on "Unknown prefix" errors
+            model_name = provider.model
+            if "/" in model_name and not model_name.startswith("openai/"):
+                model_name = f"openai/{model_name}"
 
-        # Debug: Log the input being sent to agent
-        print(f"[DEBUG] Agent input message: {message}")
-        print(f"[DEBUG] History length: {len(history) if history else 0}")
-        print(f"[DEBUG] User name: {user_name}")
-        if history:
-            for i, h in enumerate(history[-4:]):  # Last 4 messages
-                print(f"[DEBUG] History[-{len(history)-i}]: {h['role']}: {h['content'][:100]}...")
+            print(f"[CHAT] Attempting {provider.name} with model {model_name}...")
+            
+            try:
+                # FIX: Explicit Configuration
+                # We create a FRESH MultiProvider and RunConfig for this specific request.
+                # This bypasses all global os.environ caching and is thread-safe.
+                model_provider = MultiProvider(
+                    openai_api_key=provider.api_key,
+                    openai_base_url=provider.base_url
+                )
+                
+                run_config = RunConfig(
+                    model_provider=model_provider
+                )
 
-        # Run the agent with user name for personalization
-        result = await Runner.run(
-            starting_agent=self.get_agent(user_name),
-            input=input_items,
-            context=context,
-        )
+                # Initialize agent with the shielded model name
+                agent = self.get_agent(model_name, user_name)
 
-        # Debug: Log what the agent returned
-        print(f"[DEBUG] Agent new_items count: {len(result.new_items)}")
-        for item in result.new_items:
-            print(f"[DEBUG] Agent item type: {type(item).__name__}")
+                # Run
+                result = await Runner.run(
+                    starting_agent=agent,
+                    input=input_items,
+                    context=context,
+                    run_config=run_config
+                )
 
-        # Extract tool calls from the run
-        tool_calls = self._extract_tool_calls(result.new_items)
+                # Success
+                tool_calls = self._extract_tool_calls(result.new_items)
+                response = result.final_output or ""
+                print(f"[CHAT] {provider.name} responded successfully.")
+                return AgentResponse(response=str(response), tool_calls=tool_calls)
 
-        # Get the final response
-        response = result.final_output or ""
-        if not isinstance(response, str):
-            response = str(response)
+            except Exception as e:
+                err_str = str(e)
+                print(f"[WARN] {provider.name} failed: {err_str[:200]}")
+                
+                # Check for 403/Forbidden which usually means No Balance
+                if "403" in err_str or "credit" in err_str.lower() or "balance" in err_str.lower():
+                    print(f"      -> Provider {provider.name} rejected our request (Likely $0 Balance).")
+                
+                last_error = e
+                continue
 
-        return AgentResponse(
-            response=response,
-            tool_calls=tool_calls,
-        )
+        # If we got here, all providers failed
+        print("[CHAT] All providers failed.")
+        raise last_error or Exception("Assistant failed to respond. All providers exhausted.")
 
 
 async def run_agent(
@@ -227,25 +168,5 @@ async def run_agent(
     config: Optional[AgentConfig] = None,
     user_name: Optional[str] = None,
 ) -> AgentResponse:
-    """
-    Convenience function to run the agent with a single message.
-
-    Args:
-        session: Database session for task operations
-        user_id: UUID of the authenticated user
-        message: The user's natural language message
-        history: Optional conversation history
-        config: Optional AgentConfig for customization
-        user_name: Optional user name for personalized responses
-
-    Returns:
-        AgentResponse with the agent's response and tool calls
-    """
     runner = AgentRunner(config=config)
-    return await runner.run(
-        session=session,
-        user_id=user_id,
-        message=message,
-        history=history,
-        user_name=user_name,
-    )
+    return await runner.run(session, user_id, message, history, user_name)

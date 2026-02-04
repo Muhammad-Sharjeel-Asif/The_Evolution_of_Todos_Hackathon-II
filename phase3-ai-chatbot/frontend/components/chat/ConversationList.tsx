@@ -65,18 +65,18 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   };
   return (
     <div
-      className="flex flex-col h-full bg-gray-900/50 border-r border-yellow-500/20"
+      className="flex flex-col h-full bg-background border-r border-indigo-500/10"
       data-testid="conversation-list"
     >
       {/* Header with New Conversation button */}
-      <div className="p-4 border-b border-yellow-500/20">
+      <div className="p-4 border-b border-indigo-500/10">
         <button
           onClick={onNewConversation}
           className={`
             w-full px-4 py-3 rounded-xl
-            bg-yellow-500 text-black font-semibold
-            hover:bg-yellow-400
-            transition-colors duration-200
+            bg-indigo-600 text-white font-semibold
+            hover:bg-indigo-500 shadow-lg shadow-indigo-600/20
+            transition-all duration-300
             flex items-center justify-center gap-2
           `}
           data-testid="new-conversation-button"
@@ -103,13 +103,13 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="flex gap-1">
-              <span className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" />
+              <span className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" />
               <span
-                className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce"
+                className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"
                 style={{ animationDelay: '150ms' }}
               />
               <span
-                className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce"
+                className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"
                 style={{ animationDelay: '300ms' }}
               />
             </div>
@@ -125,11 +125,12 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                 key={conv.id}
                 className={`
                   relative group
-                  border-l-2
+                  border-l-4
                   ${activeConversationId === conv.id
-                    ? 'bg-yellow-500/10 border-yellow-500'
-                    : 'border-transparent hover:bg-yellow-500/10'
+                    ? 'bg-indigo-500/10 border-indigo-500'
+                    : 'border-transparent hover:bg-indigo-500/5 hover:border-indigo-500/30'
                   }
+                  transition-all duration-200
                 `}
               >
                 <button

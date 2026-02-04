@@ -157,19 +157,24 @@ async def send_chat_message(
     except Exception as e:
         # Log the actual error for debugging
         import traceback
-        print(f"Chat API Error: {str(e)}")
+        error_msg = str(e)
+        print(f"Chat API Error: {error_msg}")
         print(f"Traceback: {traceback.format_exc()}")
 
         # Return more specific error message based on the actual error
-        error_detail = str(e)
-        if "OPENAI_API_KEY" in error_detail.upper():
-            error_detail = "OpenAI API configuration error. Please check your API key."
-        elif "agents" in error_detail.lower():
-            error_detail = "AI agent initialization error. Please check agent configuration."
-        elif "module" in error_detail.lower() and "not found" in error_detail.lower():
-            error_detail = "Required module not found. Please check dependencies."
+        error_detail = error_msg
+        if "NO LLM PROVIDERS CONFIGURED" in error_msg.upper():
+            error_detail = "No valid AI keys found in .env. Please check the 'Multi-Provider' section in your backend/.env file."
+        elif "API_KEY" in error_msg.upper() or "AUTHENTICATION" in error_msg.upper():
+            error_detail = "API Authentication error. Your key was rejected by the provider. Please check if it's valid."
+        elif "QUOTA" in error_msg.upper() or "RATE_LIMIT" in error_msg.upper() or "CREDIT" in error_msg.upper() or "PERMISSION" in error_msg.upper():
+            error_detail = "Provider quota exceeded or no credit balance. Please check your account on the AI provider's console."
+        elif "TIMEOUT" in error_msg.upper():
+            error_detail = "The AI service timed out. Please try again."
+        elif "AGENTS" in error_msg.lower():
+            error_detail = "AI agent initialization error. Please check configurations."
 
-        raise HTTPException(status_code=500, detail=f"An error occurred processing your message: {error_detail}")
+        raise HTTPException(status_code=500, detail=f"Assistant Error: {error_detail}")
 
 
 # ============================================

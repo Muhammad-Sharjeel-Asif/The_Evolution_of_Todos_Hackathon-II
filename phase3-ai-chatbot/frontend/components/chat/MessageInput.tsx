@@ -51,7 +51,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <div
-      className="flex items-end gap-2 p-4 border-t border-yellow-500/20 bg-black/80"
+      className="flex items-end gap-2 p-4 border-t border-indigo-500/20 bg-background/80 backdrop-blur-sm"
       data-testid="message-input"
     >
       {/* Text area */}
@@ -67,11 +67,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         className={`
           flex-1 resize-none
           px-4 py-4 rounded-xl
-          bg-gray-900 text-white
-          border border-yellow-500/30
+          bg-card text-white
+          border border-indigo-500/10
           placeholder-gray-500
-          focus:outline-none focus:border-yellow-500/60
-          transition-colors duration-200
+          focus:outline-none focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/40
+          transition-all duration-200
           disabled:opacity-50 disabled:cursor-not-allowed
           min-h-[56px]
           max-h-[200px]
@@ -86,10 +86,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         className={`
           min-w-[56px] min-h-[56px]
           p-3 rounded-xl
-          bg-yellow-500 text-black
-          hover:bg-yellow-400
-          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-yellow-500
-          transition-colors duration-200
+          bg-indigo-600 text-white
+          hover:bg-indigo-500 shadow-lg shadow-indigo-600/20
+          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600
+          transition-all duration-300
           flex items-center justify-center
         `}
         aria-label="Send message"

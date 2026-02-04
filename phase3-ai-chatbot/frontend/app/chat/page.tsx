@@ -19,11 +19,11 @@ import { Navbar } from '@/components/layout';
  */
 function ChatLoadingFallback() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="flex gap-1">
-        <span className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce" />
-        <span className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-        <span className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        <span className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" />
+        <span className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+        <span className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
       </div>
     </div>
   );
@@ -132,7 +132,7 @@ function ChatPageContent() {
   }
 
   return (
-    <div className="h-screen bg-black flex flex-col">
+    <div className="h-screen bg-background flex flex-col">
       {/* Shared Navbar */}
       <Navbar />
 

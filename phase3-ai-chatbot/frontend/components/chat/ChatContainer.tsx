@@ -69,7 +69,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
   return (
     <div
-      className="flex h-full bg-black"
+      className="flex h-full bg-background"
       data-testid="chat-container"
     >
       {/* Sidebar toggle for mobile */}
@@ -80,8 +80,8 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
             fixed top-4 left-4 z-50
             md:hidden
             p-2 rounded-lg
-            bg-gray-900 text-white
-            border border-yellow-500/30
+            bg-card text-white
+            border border-indigo-500/30
           `}
           aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
         >

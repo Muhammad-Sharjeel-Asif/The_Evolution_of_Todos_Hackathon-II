@@ -264,24 +264,22 @@ TODO_TOOLS = [
 ]
 
 
-def create_todo_agent(config: Optional[AgentConfig] = None, user_name: Optional[str] = None) -> Agent[AgentContext]:
+def create_todo_agent(model: str, config: AgentConfig, user_name: Optional[str] = None) -> Agent[AgentContext]:
     """
-    Create a TodoAssistant agent instance.
+    Create a TodoAssistant agent instance for a specific model.
 
     Args:
-        config: Optional AgentConfig for customization. Uses defaults if not provided.
+        model: The LLM model name to use
+        config: AgentConfig for settings.
         user_name: Optional user name for personalized responses.
 
     Returns:
         Configured Agent instance ready for use with Runner.
     """
-    if config is None:
-        config = get_agent_config()
-
     return Agent[AgentContext](
         name="TodoAssistant",
         instructions=get_system_prompt(user_name),
-        model=config.model,
+        model=model,
         tools=TODO_TOOLS,
         model_settings=ModelSettings(
             temperature=config.temperature,

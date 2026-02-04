@@ -50,8 +50,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         className={`
           max-w-[80%] px-4 py-3 rounded-2xl
           ${isUser
-            ? 'bg-yellow-500 text-black rounded-br-md'
-            : 'bg-gray-800 text-white rounded-bl-md border border-yellow-500/20'
+            ? 'bg-indigo-600 text-white rounded-br-md shadow-lg shadow-indigo-500/10'
+            : 'bg-card/80 backdrop-blur-sm text-white rounded-bl-md border border-indigo-500/20 shadow-xl'
           }
         `}
       >
@@ -59,8 +59,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
         {/* Tool calls indicator for assistant messages */}
         {!isUser && message.tool_calls && Array.isArray(message.tool_calls) && message.tool_calls.length > 0 && (
-          <div className="mt-2 pt-2 border-t border-yellow-500/20">
-            <p className="text-xs text-yellow-400">
+          <div className="mt-2 pt-2 border-t border-indigo-500/20">
+            <p className="text-xs text-indigo-400 font-medium">
               Actions performed: {message.tool_calls.map(tc => tc?.tool).filter(Boolean).join(', ')}
             </p>
           </div>
