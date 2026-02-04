@@ -109,16 +109,16 @@ export const ChatDrawer: React.FC = () => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-full md:w-[75vw] lg:w-[70vw] xl:w-[60vw] bg-black border-l border-yellow-500/30 shadow-2xl shadow-yellow-500/10 z-50 flex flex-col"
+            className="fixed right-0 top-0 h-full w-full md:w-[75vw] lg:w-[70vw] xl:w-[60vw] bg-black border-l border-indigo-500/30 shadow-2xl shadow-indigo-500/10 z-50 flex flex-col"
             role="dialog"
             aria-modal="true"
             aria-label="AI Chat"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-yellow-500/20 bg-black/90 backdrop-blur-sm flex-shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-indigo-500/20 bg-black/90 backdrop-blur-sm flex-shrink-0">
               <div className="flex items-center gap-3">
                 <span className="text-xl">🤖</span>
-                <h2 className="text-lg font-semibold text-yellow-400">AI Task Assistant</h2>
+                <h2 className="text-lg font-semibold text-indigo-400">AI Task Assistant</h2>
               </div>
               <div className="flex items-center gap-2">
                 {/* Mobile: Toggle conversations */}
@@ -153,7 +153,7 @@ export const ChatDrawer: React.FC = () => {
                     animate={{ x: 0 }}
                     exit={{ x: '-100%' }}
                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                    className="md:hidden absolute inset-y-0 left-0 w-72 z-10 bg-gray-900 border-r border-yellow-500/20"
+                    className="md:hidden absolute inset-y-0 left-0 w-72 z-10 bg-gray-900 border-r border-indigo-500/20"
                   >
                     <ConversationList
                       conversations={conversations}
@@ -168,11 +168,11 @@ export const ChatDrawer: React.FC = () => {
               </AnimatePresence>
 
               {/* LEFT PANEL: Chat Area */}
-              <div className="flex-1 flex flex-col min-w-0 border-r border-yellow-500/20">
+              <div className="flex-1 flex flex-col min-w-0 border-r border-indigo-500/20">
                 {/* Desktop: Conversation sidebar */}
                 <div className="hidden md:flex h-full">
                   {/* Conversation list */}
-                  <div className="w-48 lg:w-56 border-r border-yellow-500/20 flex-shrink-0">
+                  <div className="w-48 lg:w-56 border-r border-indigo-500/20 flex-shrink-0">
                     <ConversationList
                       conversations={conversations}
                       activeConversationId={activeConversationId}
@@ -193,7 +193,7 @@ export const ChatDrawer: React.FC = () => {
                         onRetry={handleRetry}
                       />
                     </div>
-                    <div className="border-t border-yellow-500/20 flex-shrink-0">
+                    <div className="border-t border-indigo-500/20 flex-shrink-0">
                       <MessageInput
                         onSend={handleSend}
                         disabled={isLoading}
@@ -206,10 +206,10 @@ export const ChatDrawer: React.FC = () => {
                 {/* Mobile: Full width chat */}
                 <div className="md:hidden flex flex-col h-full overflow-hidden">
                   {/* Mobile new chat button */}
-                  <div className="px-3 py-2 border-b border-yellow-500/20 flex items-center gap-2 flex-shrink-0">
+                  <div className="px-3 py-2 border-b border-indigo-500/20 flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={handleNewConversation}
-                      className="flex-1 px-3 py-2 text-sm bg-yellow-500 text-black font-medium rounded-lg hover:bg-yellow-400 transition-colors"
+                      className="flex-1 px-3 py-2 text-sm bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-500 transition-colors"
                     >
                       + New Chat
                     </button>
@@ -229,7 +229,7 @@ export const ChatDrawer: React.FC = () => {
                       onRetry={handleRetry}
                     />
                   </div>
-                  <div className="border-t border-yellow-500/20 flex-shrink-0">
+                  <div className="border-t border-indigo-500/20 flex-shrink-0">
                     <MessageInput
                       onSend={handleSend}
                       disabled={isLoading}
@@ -250,7 +250,7 @@ export const ChatDrawer: React.FC = () => {
             </div>
 
             {/* Footer with keyboard hint */}
-            <div className="px-4 py-2 border-t border-yellow-500/20 bg-black/50 flex-shrink-0">
+            <div className="px-4 py-2 border-t border-indigo-500/20 bg-black/50 flex-shrink-0">
               <p className="text-xs text-gray-500 text-center">
                 Press <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-gray-400 font-mono">Esc</kbd> to close • Tasks update in real-time
               </p>

@@ -59,7 +59,7 @@ export const TaskPreview: React.FC<TaskPreviewProps> = ({
       );
     }
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
         <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
@@ -84,8 +84,8 @@ export const TaskPreview: React.FC<TaskPreviewProps> = ({
   if (tasks.length === 0) {
     return (
       <div className="p-4 text-center">
-        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-yellow-500/10 flex items-center justify-center">
-          <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-indigo-500/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
         </div>
@@ -100,8 +100,8 @@ export const TaskPreview: React.FC<TaskPreviewProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-yellow-500/20 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-yellow-400 flex items-center gap-2">
+      <div className="px-4 py-3 border-b border-indigo-500/20 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-indigo-400 flex items-center gap-2">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
@@ -129,15 +129,13 @@ export const TaskPreview: React.FC<TaskPreviewProps> = ({
               }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
-              className={`px-4 py-3 border-b border-gray-800/50 hover:bg-gray-900/50 transition-colors ${
-                highlightedIds.has(task.id) ? 'ring-1 ring-yellow-500/30' : ''
-              }`}
+              className={`px-4 py-3 border-b border-gray-800/50 hover:bg-gray-900/50 transition-colors ${highlightedIds.has(task.id) ? 'ring-1 ring-indigo-500/30' : ''
+                }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${
-                    task.status === 'completed' ? 'text-gray-500 line-through' : 'text-white'
-                  }`}>
+                  <p className={`text-sm font-medium truncate ${task.status === 'completed' ? 'text-gray-500 line-through' : 'text-white'
+                    }`}>
                     {task.title}
                   </p>
                   {task.description && (
@@ -155,7 +153,7 @@ export const TaskPreview: React.FC<TaskPreviewProps> = ({
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="flex-shrink-0 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"
+                    className="flex-shrink-0 w-2 h-2 bg-indigo-400 rounded-full animate-pulse"
                   />
                 )}
               </div>
